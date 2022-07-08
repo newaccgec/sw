@@ -1,0 +1,104 @@
+package lca_01;
+
+import java.util.*;
+import java.io.*;
+
+class Tree {
+	Node root;
+	HashMap<Integer, Node> rootMap;
+
+	Tree(int size) {
+		rootMap = new HashMap<Integer, Node>();
+		root = makeBST(0, size - 1, null);
+	}
+
+	static class Node {
+		int data;
+		Node left;
+		Node right;
+		Node Parent;
+
+		Node(int data) {
+			this.data = data;
+		}
+	}
+
+	Node makeBST(int start, int end, Node parent) {
+		if (start > end)
+			return null;
+
+		int mid = (start + end) / 2;
+		Node node = new Node(mid);
+
+		node.left = makeBST(start, mid - 1, node);
+		node.right = makeBST(mid + 1, end, node);
+		node.Parent = parent;
+
+		rootMap.put(mid, node);
+		return node;
+	}
+
+	Node getNode(int data) {
+		return rootMap.get(data);
+	}
+
+	class Result {
+		Node node;
+		boolean isAncestor;
+
+		Result(Node n, boolean isAnc) {
+			node = n;
+			isAncestor = isAnc;
+		}
+	}
+
+	Node commonAncestor(int d1, int d2) {
+		Node p = getNode(d1);
+		Node q = getNode(d2);
+
+		Result r = commonAncestor(root, p, q);
+		if (r.isAncestor) {
+			return r.node;
+		}
+		return null;
+	}
+
+	Result commonAncestor(Node root, Node p, Node q) {
+		if (root == null)
+			return new Result(null, false);
+		if (root == p && root == q)
+			return new Result(root, true);
+
+		Result rx = commonAncestor(root.left, p, q);
+		if (rx.isAncestor)
+			return rx;
+
+		Result ry = commonAncestor(root.right, p, q);
+		if (ry.isAncestor)
+			return ry;
+
+		if (rx.node != null && ry.node != null) {
+			return new Result(root, true);
+		} else if (root == p || root == q) {
+			boolean isAncestor;
+			if (rx.node != null || ry.node != null) {
+				isAncestor = true;
+			} else {
+				isAncestor = false;
+			}
+			return new Result(root, isAncestor);
+		} else {
+			return new Result(rx.node != null ? rx.node : ry.node, false);
+		}
+	}
+}
+
+public class Solution {
+	public static void main(String[] args) {
+
+		Tree t = new Tree(10);
+		Tree.Node fa = t.commonAncestor(6, 8);
+		System.out.println("LCS Is : " + fa.data);
+	}
+
+}
